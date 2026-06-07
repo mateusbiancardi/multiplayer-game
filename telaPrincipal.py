@@ -102,6 +102,8 @@ class telaPrincipal:
 
         self.imagerect = self.sprite1_tamanho.get_rect()
 
+        self.desenhos = []
+
         self.display_surface = pg.display.get_surface()
         self.sprites_visiveis = pg.sprite.Group()
         self.sprites_obstaculos = pg.sprite.Group()
@@ -484,6 +486,12 @@ class telaPrincipal:
 
         self.personagem()
 
+    def adicionaCirculo(self, cor: tuple, cords: list, raio: int, tamanho: int):
+        self.desenhos.append(["circle", cor, cords, raio, tamanho])
+
+    def adicionaSprite(self, type: str, x: int, y: int):
+        self.desenhos.append(["sprite", type, x, y])
+
     def personagem(self):
 
         self.berserker = pg.image.load(os.path.join("sprites", "berserker.png"))
@@ -504,6 +512,9 @@ class telaPrincipal:
         self.tela.blit(self.sprite2_tamanho, (self.xP2, self.yP2))
 
     def ataques(self):
+        # reset do array de desenhos
+        self.desenhos = []
+
         # Posicão centralizada dos personagens
         self.xP1CirculoCentralizado = self.xP1 + 30
         self.yP1CirculoCentralizado = self.yP1 + 25
@@ -517,13 +528,15 @@ class telaPrincipal:
         if self.p1 == 1 and self.p1AtaqueE:
             # Duração da skill
             if time() - self.duracaoCastE < 0.1:
-                pg.draw.circle(
-                    self.tela,
+
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP1CirculoCentralizado, self.yP1CirculoCentralizado),
+                    [self.xP1CirculoCentralizado, self.yP1CirculoCentralizado],
                     self.raioATQGiratorio,
                     5,
                 )
+
                 # Se o p2 está localizado na área de p1:
                 if (
                     (
@@ -552,26 +565,26 @@ class telaPrincipal:
                     )
                 ) and self.p2Vida - self.p2VidaAntes == 0:
                     self.p2Vida = self.p2Vida - self.p1Dano
-                pos_madeira = [(544, 160), (544, 192), (576, 160), (576, 192)]
-                for x in pos_madeira:
-                    if bloco(
-                        x, [self.sprites_visiveis, self.sprites_obstaculos], 5
-                    ) in range(
-                        int(self.xP1CirculoCentralizado - self.raioATQGiratorio),
-                        int(self.xP1CirculoCentralizado + self.raioATQGiratorio),
-                    ):
-                        self.tela.blit(
-                            bloco(
-                                x, [self.sprites_visiveis, self.sprites_obstaculos], 8
-                            )
-                        )
+                # pos_madeira = [(544, 160), (544, 192), (576, 160), (576, 192)]
+                # for x in pos_madeira:
+                #     if bloco(
+                #         x, [self.sprites_visiveis, self.sprites_obstaculos], 5
+                #     ) in range(
+                #         int(self.xP1CirculoCentralizado - self.raioATQGiratorio),
+                #         int(self.xP1CirculoCentralizado + self.raioATQGiratorio),
+                #     ):
+                #         self.tela.blit(
+                #             bloco(
+                #                 x, [self.sprites_visiveis, self.sprites_obstaculos], 8
+                #             )
+                #         )
             else:
                 self.p2VidaAntes = self.p2Vida
 
         # Berserk - Aumenta o dano e velocidade de ataque por um breve momento (Q)
         if self.p1 == 1 and self.p1AtaqueQ:
             if time() - self.duracaoCastQ < 3:
-                self.tela.blit(self.berserker, (self.xP1 + 10, self.yP1 - 50))
+                self.adicionaSprite(self, "berserker", self.xP1 + 10, self.yP1 - 50)
                 self.p1Velocidade = 1.55
                 self.p1Dano = 10
             else:
@@ -587,10 +600,11 @@ class telaPrincipal:
                     self.posicaoAdquirida = True
 
                 if self.posicaoAdquirida:
-                    pg.draw.circle(
-                        self.tela,
+
+                    self.adicionaCirculo(
+                        self,
                         (255, 0, 0),
-                        (self.mouse_posP1[0], self.mouse_posP1[1]),
+                        [self.mouse_posP1[0], self.mouse_posP1[1]],
                         self.raioATQGiratorio,
                         5,
                     )
@@ -634,7 +648,7 @@ class telaPrincipal:
         # Invocar Lacaio (E)
         if self.p1 == 3 and self.p1AtaqueE:
             if time() - self.duracaoCastE < 3:
-                self.tela.blit(self.lacaio, (self.xP1Lacaio, self.yP1Lacaio))
+                self.adicionaSprite(self, "lacaio", self.xP1Lacaio, self.yP1Lacaio)
 
                 distP2 = math.sqrt(
                     (self.xP2 - self.xP1Lacaio) ** 2 + (self.yP2 - self.yP1Lacaio) ** 2
@@ -674,31 +688,34 @@ class telaPrincipal:
         if self.p1 == 4 and self.p1AtaqueE:
             if time() - self.duracaoCastE < 1:
 
-                pg.draw.circle(
-                    self.tela,
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP1FlechaEsquerda, self.yP1Flecha),
+                    [self.xP1FlechaEsquerda, self.yP1Flecha],
                     self.raioATQProjetil,
                     5,
                 )
-                pg.draw.circle(
-                    self.tela,
+
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP1FlechaDireita, self.yP1Flecha),
+                    [self.xP1FlechaDireita, self.yP1Flecha],
                     self.raioATQProjetil,
                     5,
                 )
-                pg.draw.circle(
-                    self.tela,
+
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP1Flecha, self.yP1FlechaCima),
+                    [self.xP1Flecha, self.yP1FlechaCima],
                     self.raioATQProjetil,
                     5,
                 )
-                pg.draw.circle(
-                    self.tela,
+
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP1Flecha, self.yP1FlechaBaixo),
+                    [self.xP1Flecha, self.yP1FlechaBaixo],
                     self.raioATQProjetil,
                     5,
                 )
@@ -796,13 +813,14 @@ class telaPrincipal:
         # Ataque Giratório (M)
         if self.p2 == 1 and self.p2AtaqueM:
             if time() - self.duracaoCastM < 0.1:
-                pg.draw.circle(
-                    self.tela,
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP2CirculoCentralizado, self.yP2CirculoCentralizado),
+                    [self.xP2CirculoCentralizado, self.yP2CirculoCentralizado],
                     self.raioATQGiratorio,
                     5,
                 )
+
                 # Se o p1 está localizado na área de p2:
                 if (
                     (
@@ -831,26 +849,26 @@ class telaPrincipal:
                     )
                 ) and self.p1Vida - self.p1VidaAntes == 0:
                     self.p1Vida = self.p1Vida - self.p2Dano
-                pos_madeira = [(544, 160), (544, 192), (576, 160), (576, 192)]
-                for x in pos_madeira:
-                    if bloco(
-                        x, [self.sprites_visiveis, self.sprites_obstaculos], 5
-                    ) in range(
-                        int(self.xP1CirculoCentralizado - self.raioATQGiratorio),
-                        int(self.xP1CirculoCentralizado + self.raioATQGiratorio),
-                    ):
-                        self.tela.blit(
-                            bloco(
-                                x, [self.sprites_visiveis, self.sprites_obstaculos], 8
-                            )
-                        )
+                # pos_madeira = [(544, 160), (544, 192), (576, 160), (576, 192)]
+                # for x in pos_madeira:
+                #     if bloco(
+                #         x, [self.sprites_visiveis, self.sprites_obstaculos], 5
+                #     ) in range(
+                #         int(self.xP1CirculoCentralizado - self.raioATQGiratorio),
+                #         int(self.xP1CirculoCentralizado + self.raioATQGiratorio),
+                #     ):
+                #         self.tela.blit(
+                #             bloco(
+                #                 x, [self.sprites_visiveis, self.sprites_obstaculos], 8
+                #             )
+                #         )
             else:
                 self.p1VidaAntes = self.p1Vida
 
         # Berserk - Aumenta o dano e velocidade de movimento por um breve momento (N)
         if self.p2 == 1 and self.p2AtaqueN:
             if time() - self.duracaoCastN < 3:
-                self.tela.blit(self.berserker, (self.xP2 + 10, self.yP2 - 50))
+                self.adicionaSprite(self, "berserker", self.xP2 + 10, self.yP2 - 50)
                 self.p2Velocidade = 1.55
                 self.p2Dano = 10
             else:
@@ -866,10 +884,10 @@ class telaPrincipal:
                     self.posicaoAdquirida = True
 
                 if self.posicaoAdquirida:
-                    pg.draw.circle(
-                        self.tela,
+                    self.adicionaCirculo(
+                        self,
                         (255, 0, 0),
-                        (self.mouse_posP2[0], self.mouse_posP2[1]),
+                        [self.mouse_posP2[0], self.mouse_posP2[1]],
                         self.raioATQGiratorio,
                         5,
                     )
@@ -913,7 +931,7 @@ class telaPrincipal:
         # Invocar Lacaio (M)
         if self.p2 == 3 and self.p2AtaqueM:
             if time() - self.duracaoCastM < 3:
-                self.tela.blit(self.lacaio, (self.xP2Lacaio, self.yP2Lacaio))
+                self.adicionaSprite(self, "lacaio", self.xP2Lacaio, self.yP2Lacaio)
 
                 distP1 = math.sqrt(
                     (self.xP1 - self.xP2Lacaio) ** 2 + (self.yP1 - self.yP2Lacaio) ** 2
@@ -953,31 +971,31 @@ class telaPrincipal:
         if self.p2 == 4 and self.p2AtaqueM:
             if time() - self.duracaoCastM < 1:
 
-                pg.draw.circle(
-                    self.tela,
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP2FlechaEsquerda, self.yP2Flecha),
+                    [self.xP2FlechaEsquerda, self.yP2Flecha],
                     self.raioATQProjetil,
                     5,
                 )
-                pg.draw.circle(
-                    self.tela,
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP2FlechaDireita, self.yP2Flecha),
+                    [self.xP2FlechaDireita, self.yP2Flecha],
                     self.raioATQProjetil,
                     5,
                 )
-                pg.draw.circle(
-                    self.tela,
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP2Flecha, self.yP2FlechaCima),
+                    [self.xP2Flecha, self.yP2FlechaCima],
                     self.raioATQProjetil,
                     5,
                 )
-                pg.draw.circle(
-                    self.tela,
+                self.adicionaCirculo(
+                    self,
                     (0, 0, 0),
-                    (self.xP2Flecha, self.yP2FlechaBaixo),
+                    [self.xP2Flecha, self.yP2FlechaBaixo],
                     self.raioATQProjetil,
                     5,
                 )
