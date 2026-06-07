@@ -131,16 +131,6 @@ class telaPrincipal:
         self.tempoPassado = self.tempoAtual - self.tempoInicio
         self.tempoJogo = int(ConfigJogo.DURACAO_PARTIDA - self.tempoPassado)
 
-        font_tempo = pg.font.SysFont(None, ConfigJogo.FONTE_TEMPO)
-        self.textoTempo = font_tempo.render(
-            f"{self.tempoJogo}", True, ConfigJogo.COR_TEMPO
-        )
-
-        self.tela.blit(
-            self.textoTempo,
-            ((ConfigJogo.LARGURA_TELA // 2) - 30, ConfigJogo.ALTURA_TELA * 0.05),
-        )
-
     def criar_mapa(self):
         for row_index, row in enumerate(ConfigJogo.MAPA_JOGO):
             for col_index, col in enumerate(row):
@@ -160,6 +150,72 @@ class telaPrincipal:
                 if col == 0:
                     bloco((x, y), [self.sprites_visiveis, self.sprites_obstaculos], 0)
 
+    def passo(self, in1, in2):
+        self.tratamentoEventos(in1, in2)
+        self.ataques()
+        self.movimento()
+        self.endGame()
+
+        return self.serializar_estado()
+
+    def serializar_estado(self):
+        estado = {
+            "xP1": self.xP1,
+            "yP1": self.yP1,
+            "xP2": self.xP2,
+            "yP2": self.yP2,
+            "p1Vida": self.p1Vida,
+            "p2Vida": self.p2Vida,
+            "p1VidaTotal": self.p1VidaTotal,
+            "p2VidaTotal": self.p2VidaTotal,
+            "p1": self.p1,
+            "p2": self.p2,
+            "xEsquerdaP1": self.xEsquerdaP1,
+            "xDireitaP1": self.xDireitaP1,
+            "xEsquerdaP2": self.xEsquerdaP2,
+            "xDireitaP2": self.xDireitaP2,
+            "tempoJogo": self.tempoJogo,
+            "encerrada": self.encerrada,
+            "desenhos": self.desenhos,
+        }
+        return estado
+
+    def desenhaJogo(
+        self,
+        estado: dict,
+    ):
+        self.desenhaArena()
+        self.desenhaElementos(estado)
+        self.desenhaTempo(estado)
+        self.carregarPersonagem(estado)
+
+    def desenhaArena(self):
+        self.tela.fill((102, 255, 51))
+        self.sprites_visiveis.draw(self.display_surface)
+
+    def desenhaElementos(self, estado):
+        for desenho in estado["desenhos"]:
+            if desenho[0] == "circle":
+                pg.draw.circle(
+                    self.tela, desenho[1], desenho[2], desenho[3], desenho[4]
+                )
+            elif desenho[0] == "sprite":
+                if desenho[1] == "berserker":
+                    self.tela.blit(self.berserker, (desenho[2], desenho[3]))
+                elif desenho[1] == "lacaio":
+                    self.tela.blit(self.lacaio, (desenho[2], desenho[3]))
+
+    def desenhaTempo(self, estado: dict):
+        font_tempo = pg.font.SysFont(None, ConfigJogo.FONTE_TEMPO)
+        self.textoTempo = font_tempo.render(
+            f"{estado['tempoJogo']}", True, ConfigJogo.COR_TEMPO
+        )
+
+        self.tela.blit(
+            self.textoTempo,
+            ((ConfigJogo.LARGURA_TELA // 2) - 30, ConfigJogo.ALTURA_TELA * 0.05),
+        )
+
     def rodar(self):
         while not self.encerrada:
             self.tela.fill((102, 255, 51))
@@ -167,7 +223,6 @@ class telaPrincipal:
             self.tratamentoEventos()
             self.ataques()
             self.movimento()
-            self.carregarPersonagem()
             self.endGame()
 
             pg.display.flip()
@@ -408,75 +463,75 @@ class telaPrincipal:
         self.xP2 += self.v_xP2
         self.yP2 += self.v_yP2
 
-    def carregarPersonagem(self):
-        if self.p1 == 1 and self.xEsquerdaP1:
+    def carregarPersonagem(self, estado):
+        if estado["p1"] == 1 and estado["xEsquerdaP1"]:
             self.sprite1_tamanho = pg.image.load(
                 os.path.join("sprites", "guerreiro.png")
             )
 
-        elif self.p1 == 1 and self.xDireitaP1:
+        elif estado["p1"] == 1 and estado["xDireitaP1"]:
             # inverte o sprite
             self.sprite1_tamanho = pg.image.load(
                 os.path.join("sprites", "guerreiro.png")
             )
             self.sprite1_tamanho = pg.transform.flip(self.sprite1_tamanho, True, False)
 
-        if self.p1 == 2 and self.xEsquerdaP1:
+        if estado["p1"] == 2 and estado["xEsquerdaP1"]:
             self.sprite1_tamanho = pg.image.load(os.path.join("sprites", "mago.png"))
 
-        elif self.p1 == 2 and self.xDireitaP1:
+        elif estado["p1"] == 2 and estado["xDireitaP1"]:
             self.sprite1_tamanho = pg.image.load(os.path.join("sprites", "mago.png"))
             self.sprite1_tamanho = pg.transform.flip(self.sprite1_tamanho, True, False)
 
-        if self.p1 == 3 and self.xEsquerdaP1:
+        if estado["p1"] == 3 and estado["xEsquerdaP1"]:
             self.sprite1_tamanho = pg.image.load(os.path.join("sprites", "xama.png"))
 
-        elif self.p1 == 3 and self.xDireitaP1:
+        elif estado["p1"] == 3 and estado["xDireitaP1"]:
             self.sprite1_tamanho = pg.image.load(os.path.join("sprites", "xama.png"))
             self.sprite1_tamanho = pg.transform.flip(self.sprite1_tamanho, True, False)
 
-        if self.p1 == 4 and self.xEsquerdaP1:
+        if estado["p1"] == 4 and estado["xEsquerdaP1"]:
             self.sprite1_tamanho = pg.image.load(
                 os.path.join("sprites", "arqueiro.png")
             )
 
-        elif self.p1 == 4 and self.xDireitaP1:
+        elif estado["p1"] == 4 and estado["xDireitaP1"]:
             self.sprite1_tamanho = pg.image.load(
                 os.path.join("sprites", "arqueiro.png")
             )
             self.sprite1_tamanho = pg.transform.flip(self.sprite1_tamanho, True, False)
 
-        if self.p2 == 1 and self.xEsquerdaP2:
+        if estado["p2"] == 1 and estado["xEsquerdaP2"]:
             self.sprite2_tamanho = pg.image.load(
                 os.path.join("sprites", "guerreiro.png")
             )
 
-        elif self.p2 == 1 and self.xDireitaP2:
+        elif estado["p2"] == 1 and estado["xDireitaP2"]:
             self.sprite2_tamanho = pg.image.load(
                 os.path.join("sprites", "guerreiro.png")
             )
             self.sprite2_tamanho = pg.transform.flip(self.sprite2_tamanho, True, False)
 
-        if self.p2 == 2 and self.xEsquerdaP2:
+        if estado["p2"] == 2 and estado["xEsquerdaP2"]:
             self.sprite2_tamanho = pg.image.load(os.path.join("sprites", "mago.png"))
 
-        elif self.p2 == 2 and self.xDireitaP2:
+        elif estado["p2"] == 2 and estado["xDireitaP2"]:
             self.sprite2_tamanho = pg.image.load(os.path.join("sprites", "mago.png"))
             self.sprite2_tamanho = pg.transform.flip(self.sprite2_tamanho, True, False)
 
-        if self.p2 == 3 and self.xEsquerdaP2:
+        if estado["p2"] == 3 and estado["xEsquerdaP2"]:
             self.sprite2_tamanho = pg.image.load(os.path.join("sprites", "xama.png"))
 
-        elif self.p2 == 3 and self.xDireitaP2:
+        elif estado["p2"] == 3 and estado["xDireitaP2"]:
             self.sprite2_tamanho = pg.image.load(os.path.join("sprites", "xama.png"))
             self.sprite2_tamanho = pg.transform.flip(self.sprite2_tamanho, True, False)
 
-        if self.p2 == 4 and self.xEsquerdaP2:
+        if estado["p2"] == 4 and estado["xEsquerdaP2"]:
             self.sprite2_tamanho = pg.image.load(
                 os.path.join("sprites", "arqueiro.png")
             )
 
-        elif self.p2 == 4 and self.xDireitaP2:
+        elif estado["p2"] == 4 and estado["xDireitaP2"]:
             self.sprite2_tamanho = pg.image.load(
                 os.path.join("sprites", "arqueiro.png")
             )
@@ -484,7 +539,7 @@ class telaPrincipal:
 
         self.sprite3_minion = pg.image.load(os.path.join("sprites", "minion.png"))
 
-        self.personagem()
+        self.personagem(estado)
 
     def adicionaCirculo(self, cor: tuple, cords: list, raio: int, tamanho: int):
         self.desenhos.append(["circle", cor, cords, raio, tamanho])
@@ -492,24 +547,28 @@ class telaPrincipal:
     def adicionaSprite(self, type: str, x: int, y: int):
         self.desenhos.append(["sprite", type, x, y])
 
-    def personagem(self):
+    def personagem(self, estado: dict):
 
         self.berserker = pg.image.load(os.path.join("sprites", "berserker.png"))
         self.lacaio = pg.image.load(os.path.join("sprites", "minion.png"))
         font_vida = pg.font.SysFont(None, ConfigJogo.FONTE_VIDA)
         self.textoVida1 = font_vida.render(
-            f"{int(self.p1Vida)}/{self.p1VidaTotal}", True, ConfigJogo.COR_VIDA
+            f"{int(estado['p1Vida'])}/{estado['p1VidaTotal']}",
+            True,
+            ConfigJogo.COR_VIDA,
         )
 
         self.textoVida2 = font_vida.render(
-            f"{int(self.p2Vida)}/{self.p2VidaTotal}", True, ConfigJogo.COR_VIDA
+            f"{int(estado['p2Vida'])}/{estado['p2VidaTotal']}",
+            True,
+            ConfigJogo.COR_VIDA,
         )
 
-        self.tela.blit(self.textoVida1, (self.xP1, self.yP1 - 20))
-        self.tela.blit(self.textoVida2, (self.xP2, self.yP2 - 20))
+        self.tela.blit(self.textoVida1, (estado["xP1"], estado["yP1"] - 20))
+        self.tela.blit(self.textoVida2, (estado["xP2"], estado["yP2"] - 20))
 
-        self.tela.blit(self.sprite1_tamanho, (self.xP1, self.yP1))
-        self.tela.blit(self.sprite2_tamanho, (self.xP2, self.yP2))
+        self.tela.blit(self.sprite1_tamanho, (estado["xP1"], estado["yP1"]))
+        self.tela.blit(self.sprite2_tamanho, (estado["xP2"], estado["yP2"]))
 
     def ataques(self):
         # reset do array de desenhos
@@ -530,7 +589,6 @@ class telaPrincipal:
             if time() - self.duracaoCastE < 0.1:
 
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP1CirculoCentralizado, self.yP1CirculoCentralizado],
                     self.raioATQGiratorio,
@@ -584,7 +642,7 @@ class telaPrincipal:
         # Berserk - Aumenta o dano e velocidade de ataque por um breve momento (Q)
         if self.p1 == 1 and self.p1AtaqueQ:
             if time() - self.duracaoCastQ < 3:
-                self.adicionaSprite(self, "berserker", self.xP1 + 10, self.yP1 - 50)
+                self.adicionaSprite("berserker", self.xP1 + 10, self.yP1 - 50)
                 self.p1Velocidade = 1.55
                 self.p1Dano = 10
             else:
@@ -602,7 +660,6 @@ class telaPrincipal:
                 if self.posicaoAdquirida:
 
                     self.adicionaCirculo(
-                        self,
                         (255, 0, 0),
                         [self.mouse_posP1[0], self.mouse_posP1[1]],
                         self.raioATQGiratorio,
@@ -648,7 +705,7 @@ class telaPrincipal:
         # Invocar Lacaio (E)
         if self.p1 == 3 and self.p1AtaqueE:
             if time() - self.duracaoCastE < 3:
-                self.adicionaSprite(self, "lacaio", self.xP1Lacaio, self.yP1Lacaio)
+                self.adicionaSprite("lacaio", self.xP1Lacaio, self.yP1Lacaio)
 
                 distP2 = math.sqrt(
                     (self.xP2 - self.xP1Lacaio) ** 2 + (self.yP2 - self.yP1Lacaio) ** 2
@@ -689,7 +746,6 @@ class telaPrincipal:
             if time() - self.duracaoCastE < 1:
 
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP1FlechaEsquerda, self.yP1Flecha],
                     self.raioATQProjetil,
@@ -697,7 +753,6 @@ class telaPrincipal:
                 )
 
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP1FlechaDireita, self.yP1Flecha],
                     self.raioATQProjetil,
@@ -705,7 +760,6 @@ class telaPrincipal:
                 )
 
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP1Flecha, self.yP1FlechaCima],
                     self.raioATQProjetil,
@@ -713,7 +767,6 @@ class telaPrincipal:
                 )
 
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP1Flecha, self.yP1FlechaBaixo],
                     self.raioATQProjetil,
@@ -814,7 +867,6 @@ class telaPrincipal:
         if self.p2 == 1 and self.p2AtaqueM:
             if time() - self.duracaoCastM < 0.1:
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP2CirculoCentralizado, self.yP2CirculoCentralizado],
                     self.raioATQGiratorio,
@@ -868,7 +920,7 @@ class telaPrincipal:
         # Berserk - Aumenta o dano e velocidade de movimento por um breve momento (N)
         if self.p2 == 1 and self.p2AtaqueN:
             if time() - self.duracaoCastN < 3:
-                self.adicionaSprite(self, "berserker", self.xP2 + 10, self.yP2 - 50)
+                self.adicionaSprite("berserker", self.xP2 + 10, self.yP2 - 50)
                 self.p2Velocidade = 1.55
                 self.p2Dano = 10
             else:
@@ -885,7 +937,6 @@ class telaPrincipal:
 
                 if self.posicaoAdquirida:
                     self.adicionaCirculo(
-                        self,
                         (255, 0, 0),
                         [self.mouse_posP2[0], self.mouse_posP2[1]],
                         self.raioATQGiratorio,
@@ -931,7 +982,7 @@ class telaPrincipal:
         # Invocar Lacaio (M)
         if self.p2 == 3 and self.p2AtaqueM:
             if time() - self.duracaoCastM < 3:
-                self.adicionaSprite(self, "lacaio", self.xP2Lacaio, self.yP2Lacaio)
+                self.adicionaSprite("lacaio", self.xP2Lacaio, self.yP2Lacaio)
 
                 distP1 = math.sqrt(
                     (self.xP1 - self.xP2Lacaio) ** 2 + (self.yP1 - self.yP2Lacaio) ** 2
@@ -972,28 +1023,24 @@ class telaPrincipal:
             if time() - self.duracaoCastM < 1:
 
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP2FlechaEsquerda, self.yP2Flecha],
                     self.raioATQProjetil,
                     5,
                 )
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP2FlechaDireita, self.yP2Flecha],
                     self.raioATQProjetil,
                     5,
                 )
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP2Flecha, self.yP2FlechaCima],
                     self.raioATQProjetil,
                     5,
                 )
                 self.adicionaCirculo(
-                    self,
                     (0, 0, 0),
                     [self.xP2Flecha, self.yP2FlechaBaixo],
                     self.raioATQProjetil,
