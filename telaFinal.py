@@ -36,6 +36,11 @@ class telaFinal:
 
     def eventos(self):
         pg.event.get()
+        
+        if pg.event.peek(pg.QUIT):
+            self.encerrado = True
+            sys.exit(0)
+        
         if pg.key.get_pressed()[pg.K_ESCAPE]:
             self.encerrado = True
             sys.exit(0)

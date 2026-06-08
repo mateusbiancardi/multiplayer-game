@@ -3,13 +3,16 @@ import sys
 import socket
 import pygame as pg
 import rede.protocolo as pt
+from telaAguardando import Aguardando
+from telaFinal import telaFinal
+from telaInicial import Menu
+from selecaoPersonagem import telaSelecao
 
 from rede.protocolo import enviar_msg, receber_msg, mais_novo
 from configJogo import ConfigJogo
 from telaPrincipal import telaPrincipal
 
 FPS = 60
-
 
 def ler_entrada_local() -> dict:
     inputs = {}
@@ -39,14 +42,40 @@ def main():
     pg.init()
     tela = pg.display.set_mode((ConfigJogo.LARGURA_TELA, ConfigJogo.ALTURA_TELA))
 
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
     sock.connect(servidor)
 
     enviar_msg(sock, {"tipo": "hello"})
-
+    
+    cena = Menu(tela)
+    cena.rodar()
+    
+    selecao = telaSelecao(tela)
+    personagem = None
+    
+    while personagem is None:
+        personagem = selecao.rodar()
+        
+    sock.setblocking(False)
+    enviar_msg(sock, {"tipo": "personagem", "personagem": personagem})
+    
+    aguardando = Aguardando(tela)
+    
+    pg.event.pump()
+    aguardando.desenha()
+    
+    try:
+        while True:
+            msg, addr = pt.receber_msg(sock, pt.BUFSIZE)
+            if msg.get("tipo") == "personagem_escolhido":
+                print("Servidor confirmou escolha de personagem. Continuando...")
+                break
+    except BlockingIOError:
+        pass
+   
     jogo = telaPrincipal(tela, [1, 1])
 
-    sock.setblocking(False)
     clock = pg.time.Clock()
     seq_input = 0
     ultimo_estado = None
@@ -75,6 +104,9 @@ def main():
                 break
 
         clock.tick(FPS)
+
+    final = telaFinal(tela, ultimo_estado['p1Vida'], ultimo_estado['p2Vida'])
+    final.rodar_final()
 
     sock.close()
     pg.quit()

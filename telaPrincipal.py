@@ -643,7 +643,7 @@ class telaPrincipal:
         if self.p1 == 1 and self.p1AtaqueQ:
             if time() - self.duracaoCastQ < 3:
                 self.adicionaSprite("berserker", self.xP1 + 10, self.yP1 - 50)
-                self.p1Velocidade = 1.55
+                self.p1Velocidade = 2
                 self.p1Dano = 10
             else:
                 self.p1Velocidade = self.p1VelocidadePadrao

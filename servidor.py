@@ -40,6 +40,19 @@ def espera_jogadores(sock: socket.socket) -> tuple[int, int]:
 
     return lista
 
+def espera_personagem(sock: socket.socket, addr_j1: int, addr_j2: int) -> tuple[int, int]:
+    print("Esperando escolha de personagem")
+    personagens = {}
+
+    while len(personagens) < 2:
+        msg, addr = pt.receber_msg(sock, pt.BUFSIZE)
+        if msg.get("tipo") == "personagem" and addr in [addr_j1, addr_j2]:
+            personagens[addr] = msg.get("personagem")
+            print(f"Jogador {addr[0]}:{addr[1]} escolheu personagem {personagens[addr]}")
+        elif addr not in [addr_j1, addr_j2]:
+            print(f"Mensagem de {addr[0]}:{addr[1]} ignorada. Jogador não conectado.")
+
+    return [personagens[addr_j1], personagens[addr_j2]]
 
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -50,8 +63,16 @@ def main():
 
     pg.init()
     pg.display.set_mode((ConfigJogo.LARGURA_TELA, ConfigJogo.ALTURA_TELA))
-    # Fase 3: personagens hardcoded pra testar a rede. Fase 5: receber escolha de cada cliente.
-    escolhidos = [1, 2]  # [char do j1, char do j2]
+    
+    escolhidos = espera_personagem(sock, addr_j1, addr_j2)
+    print(f"Personagens escolhidos: {escolhidos[0]} (jogador 1), {escolhidos[1]} (jogador 2)")
+    enviar_msg(
+        sock, {"tipo": "personagem_escolhido"}, addr_j1
+    )
+    enviar_msg(
+        sock, {"tipo": "personagem_escolhido"}, addr_j2
+    )
+    
     jogo = telaPrincipal(None, escolhidos)  # 'tela' = None: servidor não desenha
 
     # guarda o último input de cada jogador (e o último seq pra descartar pacote velho)
@@ -61,7 +82,7 @@ def main():
     sock.setblocking(False)
     clock = pg.time.Clock()
     seq_estado = 0
-
+    
     while not jogo.encerrada:
         try:
             while True:
@@ -86,7 +107,7 @@ def main():
 
         clock.tick(FPS)
 
-    print("partida encerrada")
+    print("Partida encerrada")
     sock.close()
 
 

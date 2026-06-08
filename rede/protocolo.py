@@ -14,7 +14,6 @@ def enviar_msg(sock: socket.socket, obj: dict, addr: tuple | None = None) -> Non
 
 
 def receber_msg(sock: socket.socket, bufsize: int = 4096) -> tuple[dict, tuple]:
-    # sock.setblocking(False)
 
     dados, addr = sock.recvfrom(bufsize)
     return json.loads(dados.decode("utf-8")), addr

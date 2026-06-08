@@ -11,7 +11,7 @@ class Personagem:
         if self.personagem == 1:
             
             VELOCIDADE = 1.3
-            VIDA = 40
+            VIDA = 30
             VELOCIDADE_ATQ = 2
             DANO = 5
             self.status = (VELOCIDADE, VIDA, 1, VELOCIDADE_ATQ, DANO)

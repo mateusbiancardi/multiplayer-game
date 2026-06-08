@@ -31,7 +31,7 @@ class telaSelecao:
         self.persoSelecionado = 1
         self.persoConfirmado = False
         self.personagem1 = 0
-        self.personagem2 = 0
+        # self.personagem2 = 0
  
         
     def rodar(self):
@@ -40,7 +40,7 @@ class telaSelecao:
             self.desenha()
         ## Retorna os personagens selecionados
         if self.encerrada:
-            return (self.personagem1, self.personagem2)
+            return self.personagem1
             
     
     def tratamento_eventos(self):
@@ -69,13 +69,8 @@ class telaSelecao:
                         self.persoSelecionado -= 1
                 
                 if event.key == pg.K_SPACE:
-                    
-                    if self.personagem1 == 0:
-                        self.personagem1 = self.persoSelecionado
-                    
-                    elif self.personagem2 == 0:
-                        self.personagem2 = self.persoSelecionado
-                        self.persoConfirmado = True
+                    self.personagem1 = self.persoSelecionado
+                    self.persoConfirmado = True
 
 
     
@@ -104,9 +99,6 @@ class telaSelecao:
         if self.personagem1 == 0:
             self.titulo = font_titulo.render(
                 f'Selecione o primeiro personagem', True, ConfigJogo.COR_TITULO)
-        elif self.personagem2 == 0:
-            self.titulo = font_titulo.render(
-                f'Selecione o segundo personagem', True, ConfigJogo.COR_TITULO)
             
         self.textoPersonagem1 = self.font_personagem.render(
             f'Guerreiro: Combatente voraz capaz de destruir qualquer um.', True, ConfigJogo.COR_PERSONAGEM)
