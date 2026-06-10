@@ -1,6 +1,4 @@
 import pygame as pg
-import sys
-from telaPrincipal import telaPrincipal
 from configJogo import ConfigJogo
 
 class telaFinal:
@@ -35,15 +33,14 @@ class telaFinal:
             self.eventos()
 
     def eventos(self):
-        pg.event.get()
-        
-        if pg.event.peek(pg.QUIT):
-            self.encerrado = True
-            sys.exit(0)
-        
+        # captura o X da janela no proprio get (peek depois do get nao acha nada,
+        # porque get ja esvaziou a fila)
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                self.encerrado = True
+
         if pg.key.get_pressed()[pg.K_ESCAPE]:
             self.encerrado = True
-            sys.exit(0)
 
     def desenha(self):
         self.tela_f.fill((255, 255, 255))
