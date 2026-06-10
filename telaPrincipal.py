@@ -49,7 +49,7 @@ class telaPrincipal:
         self.p1VelocidadePadrao = p1.status[0]
         self.p2VelocidadePadrao = p2.status[0]
 
-        self.v_Flecha = 2.0
+        self.v_Flecha = 3.0
 
         self.xP1FlechaEsquerda = 0
         self.xP1FlechaDireita = 0
@@ -84,7 +84,7 @@ class telaPrincipal:
         self.v_xP1 = 0
         self.v_yP1 = 0
 
-        self.v_Lacaio = 2.3
+        self.v_Lacaio = 3.0
         self.xP1Lacaio = 0
         self.yP1Lacaio = 0
         self.xP2Lacaio = 0
