@@ -84,7 +84,7 @@ class telaPrincipal:
         self.v_xP1 = 0
         self.v_yP1 = 0
 
-        self.v_Lacaio = 1.55
+        self.v_Lacaio = 2.3
         self.xP1Lacaio = 0
         self.yP1Lacaio = 0
         self.xP2Lacaio = 0
@@ -643,7 +643,7 @@ class telaPrincipal:
         if self.p1 == 1 and self.p1AtaqueQ:
             if time() - self.duracaoCastQ < 3:
                 self.adicionaSprite("berserker", self.xP1 + 10, self.yP1 - 50)
-                self.p1Velocidade = 2
+                self.p1Velocidade = 3
                 self.p1Dano = 10
             else:
                 self.p1Velocidade = self.p1VelocidadePadrao
@@ -921,7 +921,7 @@ class telaPrincipal:
         if self.p2 == 1 and self.p2AtaqueN:
             if time() - self.duracaoCastN < 3:
                 self.adicionaSprite("berserker", self.xP2 + 10, self.yP2 - 50)
-                self.p2Velocidade = 1.55
+                self.p2Velocidade = 3
                 self.p2Dano = 10
             else:
                 self.p2Velocidade = self.p2VelocidadePadrao
